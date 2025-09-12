@@ -75,10 +75,10 @@ export default {
   methods: {
     getUserInfo(){
       getallusers().then(res=>{
-        this.users = res.data.data;
+        this.users = res.data;
       }),
       getroles().then(res=>{
-        this.allRoles = res.data.data;
+        this.allRoles = res.data;
       })
     },
     editUser(user) {

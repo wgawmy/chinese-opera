@@ -51,15 +51,37 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 配置授权规则   指定/login路径.允许匿名访问(未登录可访问已登陆不能访问). 其他路径需要身份认证
                 .authorizeHttpRequests(auth -> auth
+                        // 完全公开的接口（不需要登录）
                         .requestMatchers(
-                                "/user/login",
-                                "/code",
-                                "/user/register",
-                                "/file/upload",
-                                "/shop-type/**",
-                                "/upload/**",
-                                "/blog/hot")
-                        .anonymous().anyRequest().authenticated())
+                                "/user/login",           // 登录接口
+                                "/code",                 // 验证码接口
+                                "/user/register",        // 注册接口
+                                "/file/upload",          // 文件上传
+
+                                // 戏曲相关接口（游客可访问）
+                                "/opera/list",           // 获取戏曲列表
+                                "/opera/tag",            // 按标签获取戏曲
+                                "/opera/{id}",           // 获取单个戏曲详情
+
+                                // 音频相关接口
+                                "/audio/getaudiobytag",  // 按标签获取音频
+
+                                // 热门和访问相关
+                                "/access/hot",           // 热门列表
+
+                                // 评论相关（游客可查看）
+                                "/comments/{operaId}",   // 获取评论列表
+
+                                // 商店相关
+                                "/shop-type/**",         // 商店类型
+                                "/shop/**",              // 商店相关接口
+
+                                // 静态资源
+                                "/upload/**"             // 上传文件访问
+                        )
+                        .permitAll()  // 改为 permitAll() 允许所有人访问（包括已登录和未登录用户）
+
+                        .anyRequest().authenticated())
                 //开启跨域访问
                 .cors(withDefaults())
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);

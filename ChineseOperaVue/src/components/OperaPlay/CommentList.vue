@@ -151,7 +151,7 @@ export default {
             addComment(insertComment).then(res=>{
                 getCommentsByOperaId(this.comments[0].operaId).then(response => {
 
-                    this.localComments = response.data.data; 
+                    this.localComments = response.data; 
                 });
                 // 清空输入框操作。
                 const inputContent = this.$refs['replyInput' + index]?.[0]; // .[0] 取第一个匹配的元素

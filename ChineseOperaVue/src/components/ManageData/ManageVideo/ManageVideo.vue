@@ -173,12 +173,12 @@ export default {
         pageSize:this.pageSize
       }
       const res = await getAlloperaInfo(params);
-      this.operaList = res.data.data.records;
-      this.total = res.data.data.total
+      this.operaList = res.data.records;
+      this.total = res.data.total
     },
     async loadCollectionInfo(){
       const res = await getCollectionInfo();
-      this.collectList = res.data.data;
+      this.collectList = res.data;
     },
     handleCurrentChange(newPage){
       this.pageNum = newPage;

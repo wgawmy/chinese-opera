@@ -129,7 +129,7 @@
     methods:{
       getRanking(){
         getHotList().then(res=>{
-          this.HotList = res.data.data;
+          this.HotList = res.data;
         })
       },
       navigateToOperaPlay(opera){

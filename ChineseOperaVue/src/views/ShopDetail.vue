@@ -109,11 +109,11 @@ export default {
   methods: {
     fetchShopDetails() {
       getShopDetailById(this.shopId).then(res => {
-        this.shop = res.data.data;
+        this.shop = res.data;
         this.imageList = this.shop.images ? this.shop.images.split(",") : [];
       });
       getVoucherList(this.shopId).then(res => {
-        this.coupons = res.data.data;
+        this.coupons = res.data;
       })
     },
     buyCoupon(coupon) {

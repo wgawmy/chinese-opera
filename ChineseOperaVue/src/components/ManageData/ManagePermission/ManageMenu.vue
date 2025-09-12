@@ -60,7 +60,7 @@ export default {
   methods: {
     getUserpermission() {
       getpermission().then(res => {
-        this.menuList = res.data.data;
+        this.menuList = res.data;
       });
     },
     openAddDialog() {

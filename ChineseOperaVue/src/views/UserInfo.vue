@@ -74,7 +74,7 @@
     methods: {
         getUserInfo(){
             getInfo().then(res=>{
-                this.user = res.data.data.user;
+                this.user = res.data.user;
             })
         },
       // 点击“修改”按钮时，复制用户数据到 tempUser

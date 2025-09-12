@@ -43,7 +43,7 @@ export default {
     methods: {
         getComments() {
             getCommentsByOperaId(this.operaid).then(res => {
-                this.comments = res.data.data;
+                this.comments = res.data;
             });
         },
         showReplyBtn() {

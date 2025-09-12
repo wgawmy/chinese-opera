@@ -39,8 +39,8 @@ export default {
   methods: {
     fetchShopList(page) {
       getShopListByName(page).then(res => {
-        this.shopList = res.data.data.records;
-        this.total = res.data.data.total;
+        this.shopList = res.data.records;
+        this.total = res.data.total;
       });
     },
     handlePageChange(page) {

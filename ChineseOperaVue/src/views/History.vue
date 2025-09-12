@@ -55,7 +55,7 @@ export default {
     methods:{
         getOperasByUserId(){
             getOperasFromUserAccess().then(res=>{
-                this.operaList = res.data.data;
+                this.operaList = res.data;
             })
         },
         toggleBatchMode() {

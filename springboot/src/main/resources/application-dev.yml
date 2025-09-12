@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   application:
     name: springboot
@@ -19,12 +19,12 @@ spring:
     cache:
       redis:
         time-to-live: 3600000
-  rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
-    virtualHost: /
-    listener:
-      simple:
-        acknowledge-mode: manual
+#  rabbitmq:
+#    host: 127.0.0.1
+#    port: 5672
+#    username: guest
+#    password: guest
+#    virtualHost: /
+#    listener:
+#      simple:
+#        acknowledge-mode: manual

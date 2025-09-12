@@ -89,10 +89,10 @@ export default {
   methods: {
     getRolesInfo() {
       getroles().then((res) => {
-        this.roles = res.data.data;
+        this.roles = res.data;
       });
       getpermission().then((res) => {
-        this.allPermissions = res.data.data;
+        this.allPermissions = res.data;
       });
     },
     openAddDialog() {
