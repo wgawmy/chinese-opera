@@ -1,114 +1,224 @@
 package com.example.springboot.service.Impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.springboot.common.constant.HttpStatus;
 import com.example.springboot.domain.Comment;
-import com.example.springboot.utils.RedisCache;
-import com.example.springboot.utils.ResponseResult;
-import com.example.springboot.domain.User;
+import com.example.springboot.domain.DTO.CommentDTO;
 import com.example.springboot.mapper.CommentMapper;
-import com.example.springboot.mapper.UserMapper;
 import com.example.springboot.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static com.example.springboot.common.constant.CacheConstants.OPERA_COMMENT;
-import static com.example.springboot.common.constant.CacheConstants.OPERA_COMMENT_TTL;
 
 
 @Service
-public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
-    @Autowired
-    CommentMapper commentMapper;
-    @Autowired
-    UserMapper userMapper;
-    @Autowired
-    RedisCache redisCache;
-    //1.添加一个线程安全的队列
-    private final ConcurrentLinkedDeque<Comment> commentQueue = new ConcurrentLinkedDeque<>();
-    @Override
-    public ResponseResult getCommentsByOperaId(long operaId) {
-        String cacheKey = OPERA_COMMENT + ":" + operaId;
-        //1.先检查缓存当中是否有
-        List<Comment> rootComments = redisCache.getCacheList(cacheKey);
-        //2.如果没有
-        if(rootComments==null||rootComments.isEmpty()){
-            List<Comment> commentList = commentMapper.selectByOperaId(operaId);
-            for(Comment comment:commentList){
-                User user = userMapper.selectById(comment.getUserId());
-                comment.setUser(user);
-            }
-            //将评论按照parentId进行分组
-            Map<Long,List<Comment>> groupedComments = commentList.stream().collect(Collectors.groupingBy(comment-> comment.getParentId() == null ? -1L : comment.getParentId()));
+@Transactional
+public class CommentServiceImpl implements CommentService {
 
-            rootComments = buildCommentsTree(groupedComments,-1L);
-
-            redisCache.setCacheList(cacheKey,rootComments);
-            redisCache.expire(cacheKey,OPERA_COMMENT_TTL, TimeUnit.MINUTES);
-        }
-        return new ResponseResult<>(HttpStatus.SUCCESS,"获取戏曲评论成功",rootComments);
-    }
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
-    public ResponseResult addComment(Comment comment) {
-        boolean total = commentMapper.insertComment(comment);
-        //成功插入到数据库当中，以及更新缓存
+    public List<Comment> getCommentsByOperaId(Long operaId) {
+        // 1. 获取所有评论（包含用户信息）
+        List<Comment> allComments = commentMapper.selectCommentsWithUserInfo(operaId);
 
-        if(total){
-            //2.将评论添加到队列当中
-            //commentQueue.add(comment);
-            //异步
-            CompletableFuture.runAsync(()->{
-                String cacheKey = OPERA_COMMENT + ":" + comment.getOperaId();
-                redisCache.deleteObject(cacheKey);
-            });
-
-            return new ResponseResult<>(HttpStatus.SUCCESS, "插入数据成功");
-        }
-        return new ResponseResult<>(HttpStatus.ERROR, "插入数据失败");
-    }
-
-
-    private List<Comment> buildCommentsTree(Map<Long, List<Comment>> groupedComments, Long parentId) {
-        List<Comment> commentList = groupedComments.get(parentId);
-        if(commentList == null){
+        if (allComments == null || allComments.isEmpty()) {
             return new ArrayList<>();
         }
-        for(Comment comment: commentList){
-            List<Comment> children = buildCommentsTree(groupedComments, comment.getId());
-            comment.setChildren(children);
+
+        // 2. 构建层级结构
+        Map<Long, Comment> commentMap = new HashMap<>();
+        List<Comment> rootComments = new ArrayList<>();
+
+        // 先添加所有评论到 map 中，并初始化回复列表
+        for (Comment comment : allComments) {
+            comment.setReplies(new ArrayList<>());
+            commentMap.put(comment.getId(), comment);
         }
-        return commentList;
+
+        // 构建父子关系
+        for (Comment comment : allComments) {
+            if (comment.getParentId() == null) {
+                // 根评论
+                rootComments.add(comment);
+            } else {
+                // 回复评论
+                Comment parent = commentMap.get(comment.getParentId());
+                if (parent != null) {
+                    parent.getReplies().add(comment);
+                }
+            }
+        }
+
+        // 按创建时间排序（最新的在前）
+        rootComments.sort((c1, c2) -> c2.getCreateTime().compareTo(c1.getCreateTime()));
+
+        return rootComments;
     }
 
-//    @Scheduled(fixedRate = 5000) // 每5秒执行一次
-//    public void batchUpdateCache() {
-//        if (!commentQueue.isEmpty()) {
-//            Map<Long, List<Comment>> commentsByOperaId = commentQueue.stream()
-//                    .collect(Collectors.groupingBy(Comment::getOperaId));
-//            commentQueue.clear(); // 清空队列
-//
-//            commentsByOperaId.forEach((operaId, comments) -> {
-//                String cacheKey = OPERA_COMMENT + ":" + operaId;
-//                // 获取现有缓存数据
-//                List<Comment> cachedComments = redisCache.getCacheList(cacheKey);
-//                if (cachedComments == null) {
-//                    cachedComments = new ArrayList<>();
-//                }
-//                // 添加新的评论到缓存
-//                cachedComments.addAll(comments);
-//                redisCache.setCacheList(cacheKey, cachedComments);
-//                redisCache.expire(cacheKey, OPERA_COMMENT_TTL, TimeUnit.MINUTES);
-//            });
-//        }
-//    }
+    @Override
+    public void addComment(CommentDTO commentDTO) throws Exception {
+        try {
+            // 参数验证
+            validateCommentDTO(commentDTO);
+
+            // 检查父评论是否存在（如果是回复）
+            if (commentDTO.getParentId() != null) {
+                Comment parentComment = commentMapper.selectById(commentDTO.getParentId());
+                if (parentComment == null || parentComment.getStatus() != 1) {
+                    throw new Exception("父评论不存在或已被删除");
+                }
+            }
+
+            // 创建评论对象
+            Comment comment = new Comment();
+            comment.setContent(commentDTO.getContent().trim());
+            comment.setUserId(commentDTO.getUserId());
+            comment.setOperaId(commentDTO.getOperaId());
+            comment.setParentId(commentDTO.getParentId());
+            comment.setLikeCount(0);
+            comment.setStatus(1); // 1-正常状态
+
+            // 插入评论
+            commentMapper.insertComment(comment);
+
+            // 更新戏曲的评论数统计
+            commentMapper.updateOperaCommentCount(commentDTO.getOperaId());
+
+        } catch (Exception e) {
+            throw new Exception("添加评论失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean canDeleteComment(Long commentId, Long userId) {
+        try {
+            Comment comment = commentMapper.selectById(commentId);
+            if (comment == null || comment.getStatus() != 1) {
+                return false;
+            }
+
+            // 评论作者可以删除，或者管理员可以删除
+            return comment.getUserId().equals(userId) || isAdmin(userId);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void deleteComment(Long commentId) throws Exception {
+        try {
+            Comment comment = commentMapper.selectById(commentId);
+            if (comment == null) {
+                throw new Exception("评论不存在");
+            }
+
+            // 软删除评论
+            commentMapper.updateStatus(commentId, 0);
+
+            // 同时软删除该评论的所有回复
+            commentMapper.deleteRepliesByParentId(commentId);
+
+            // 更新戏曲评论数统计
+            commentMapper.updateOperaCommentCount(comment.getOperaId());
+
+        } catch (Exception e) {
+            throw new Exception("删除评论失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Map<String, Object> toggleLike(Long commentId, Long userId) throws Exception {
+        try {
+            Map<String, Object> result = new HashMap<>();
+
+            // 检查评论是否存在
+            Comment comment = commentMapper.selectById(commentId);
+            if (comment == null || comment.getStatus() != 1) {
+                throw new Exception("评论不存在或已被删除");
+            }
+
+            // 检查是否已点赞
+            boolean isLiked = commentMapper.checkLike(commentId, userId);
+
+            if (isLiked) {
+                // 取消点赞
+                commentMapper.deleteLike(commentId, userId);
+                commentMapper.decrementLikeCount(commentId);
+                result.put("action", "unlike");
+                result.put("message", "取消点赞");
+            } else {
+                // 添加点赞
+                commentMapper.insertLike(commentId, userId);
+                commentMapper.incrementLikeCount(commentId);
+                result.put("action", "like");
+                result.put("message", "点赞成功");
+            }
+
+            // 返回最新的点赞数
+            Comment updatedComment = commentMapper.selectById(commentId);
+            result.put("likeCount", updatedComment.getLikeCount());
+            result.put("isLiked", !isLiked);
+
+            return result;
+        } catch (Exception e) {
+            throw new Exception("点赞操作失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean isLiked(Long commentId, Long userId) {
+        try {
+            return commentMapper.checkLike(commentId, userId);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+
+
+
+
+
+    // ===== 私有辅助方法 =====
+
+    /**
+     * 验证评论DTO参数
+     */
+    private void validateCommentDTO(CommentDTO commentDTO) throws Exception {
+        if (commentDTO == null) {
+            throw new Exception("评论数据不能为空");
+        }
+        if (commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
+            throw new Exception("评论内容不能为空");
+        }
+        if (commentDTO.getContent().length() > 500) {
+            throw new Exception("评论内容不能超过500字符");
+        }
+        if (commentDTO.getUserId() == null) {
+            throw new Exception("用户ID不能为空");
+        }
+        if (commentDTO.getOperaId() == null) {
+            throw new Exception("戏曲ID不能为空");
+        }
+    }
+
+    /**
+     * 检查是否为管理员
+     */
+    private boolean isAdmin(Long userId) {
+        try {
+            // 这里应该根据实际的权限系统来判断
+            // 例如查询用户角色表
+            return commentMapper.checkUserRole(userId, "admin") ||
+                    commentMapper.checkUserRole(userId, "super_admin");
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

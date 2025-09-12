@@ -57,6 +57,7 @@ public class SecurityConfig {
                                 "/code",                 // 验证码接口
                                 "/user/register",        // 注册接口
                                 "/file/upload",          // 文件上传
+                                "/user/logout",
 
                                 // 戏曲相关接口（游客可访问）
                                 "/opera/list",           // 获取戏曲列表
@@ -80,7 +81,37 @@ public class SecurityConfig {
                                 "/upload/**"             // 上传文件访问
                         )
                         .permitAll()  // 改为 permitAll() 允许所有人访问（包括已登录和未登录用户）
+                        // 需要登录的接口
+                        .requestMatchers(
+                                "/user",                 // 用户信息
+                                "/user/update",          // 更新用户信息
+                                "/user/manage-update",   // 管理更新用户
 
+
+                                // 个人功能
+                                "/access/history",       // 用户历史记录
+                                "/access",               // 访问记录管理
+
+                                // 评论功能（需要登录才能发布）
+                                "/comments/addcomment",  // 添加评论
+                                "/comments/*/like",      // 点赞评论（通配符匹配）
+                                "/comments/*/like-status", // 获取点赞状态（通配符匹配）
+                                "/comments/*",           // 删除评论（DELETE 请求）
+
+                                // 收藏等个人功能
+                                "/collection/**",        // 收藏相关
+                                "/favorites/**"          // 收藏夹相关
+                        )
+                        .authenticated()
+                        // 管理员接口（需要特定权限）
+                        .requestMatchers(
+                                "/opera",                // 新增/更新/删除戏曲（POST/PUT/DELETE）
+                                "/audio/addaudiobatch",  // 批量添加音频
+                                "/user/list",            // 用户列表管理
+                                "/menu/**",              // 菜单权限管理
+                                "/role/**"               // 角色管理
+                        )
+                        .hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
                 //开启跨域访问
                 .cors(withDefaults())

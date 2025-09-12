@@ -16,19 +16,16 @@ import java.util.List;
 public class Comment {
     @TableId(type = IdType.AUTO)
     private Long id;
-
-    private Long operaId;
-
-    private Long userId;
-
-    private Long parentId;
-
     private String content;
-
-    private LocalDateTime createdAt;
-
-    private User user;
-
-    private List<Comment> children;
-
+    private Long userId;
+    private String userName;      // 关联查询用户名
+    private String userAvatar;    // 关联查询用户头像
+    private Long operaId;
+    private Long parentId;
+    private Integer likeCount;
+    private Integer status;       // 1-正常，0-删除，2-审核中
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+    private List<Comment> replies; // 子评论列表
 }
+

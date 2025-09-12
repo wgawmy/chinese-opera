@@ -49,21 +49,40 @@
             class="profile-container"
             @mouseover="showHeaderDropdown"
             @mouseleave="hideHeaderDropdown"
+            @click="handleAvatarClick"
           >
             <!-- 头像部分 -->
             <div class="profile-avatar">
               <img
-                src="https://img.shetu66.com/2023/04/25/1682391069844152.png"
-                alt="用户头像"
+                :src="userAvatar"
+                :alt="isLoggedIn ? '用户头像' : '默认头像'"
                 class="avatar-img"
               />
+              <!-- 显示用户名或登录状态 -->
+              <span class="user-status" v-if="!isLoggedIn">点击登录</span>
             </div>
             <!-- 下拉菜单  -->
             <div class="profile-dropdown" v-if="isDropdownVisible">
               <ul>
-                <li><a href="#" @click="goTouserInfo">个人信息</a></li>
-                <li><a href="#" @click="goToLogin">登录</a></li>
-                <li><a href="#" @click="LoginOut">注销</a></li>
+                <!-- 已登录时显示的菜单 -->
+                <template v-if="isLoggedIn">
+                  <li class="user-info">
+                    <span class="username">{{ displayUserName }}</span>
+                  </li>
+                  <li><a href="#" @click="goTouserInfo">个人信息</a></li>
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      @click.stop.prevent="LoginOut"
+                      onclick="console.log('原生click事件触发')"
+                      >注销</a
+                    >
+                  </li>
+                </template>
+                <!-- 未登录时显示的菜单 -->
+                <template v-else>
+                  <li><a href="#" @click="goToLogin">登录</a></li>
+                </template>
               </ul>
             </div>
           </div>
@@ -126,6 +145,25 @@ export default {
   computed: {
     userStore() {
       return useUserStore()
+    },
+    // 判断是否已登录
+    isLoggedIn() {
+      return !!(this.userStore.token && this.userStore.userId)
+    },
+    // 获取用户头像，如果没有则使用默认头像
+    userAvatar() {
+      if (this.isLoggedIn && this.userStore.avatar) {
+        return this.userStore.avatar
+      }
+      // 默认头像
+      return 'https://img.shetu66.com/2023/04/25/1682391069844152.png'
+    },
+    // 获取用户名，如果没有则显示"未登录"
+    displayUserName() {
+      if (this.isLoggedIn && this.userStore.userName) {
+        return this.userStore.userName
+      }
+      return '未登录'
     }
   },
   methods: {
@@ -134,6 +172,14 @@ export default {
     },
     hideHeaderDropdown() {
       this.isDropdownVisible = false
+    },
+    // 处理头像点击事件
+    handleAvatarClick() {
+      // 如果未登录，直接跳转到登录页
+      if (!this.isLoggedIn) {
+        this.goToLogin()
+      }
+      // 如果已登录，保持下拉菜单行为
     },
     goToLogin() {
       this.$router.push({
@@ -160,10 +206,60 @@ export default {
         name: 'Shop'
       })
     },
-    LoginOut() {
-      this.userStore.logOut().then(() => {
-        this.$router.push({ name: 'Login' })
+    async LoginOut() {
+      // 防止下拉菜单隐藏
+      this.isDropdownVisible = true
+
+    //   alert('LoginOut方法被调用了！')
+      console.log('=== 开始退出登录流程 ===')
+      console.log('当前用户状态:', {
+        token: this.userStore.token ? '存在' : '不存在',
+        userId: this.userStore.userId,
+        userName: this.userStore.userName
       })
+
+      try {
+        // 显示确认对话框
+        console.log('显示确认对话框')
+        await this.$confirm('确定要退出登录吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+
+        console.log('用户确认退出，开始执行退出操作')
+
+        // 直接调用userStore的logOut方法
+        await this.userStore.logOut()
+
+        console.log('退出登录操作完成')
+
+        // 显示成功消息
+        this.$message.success('退出登录成功')
+
+        console.log('准备跳转到登录页')
+        // 跳转到登录页
+        await this.$router.push({ name: 'Login' })
+        console.log('已跳转到登录页')
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('退出登录过程中发生错误:', error)
+
+          // 如果出现任何错误，确保清理本地状态
+          console.log('强制清理用户状态')
+          this.userStore.clearUserInfo()
+
+          this.$message.warning('退出登录完成，本地状态已清理')
+
+          // 跳转到登录页
+          console.log('错误处理：跳转到登录页')
+          await this.$router.push({ name: 'Login' })
+        } else {
+          console.log('用户取消了退出操作')
+        }
+      }
+
+      console.log('=== 退出登录流程结束 ===')
     },
     navigateToManage() {
       this.$router.push({
@@ -263,18 +359,38 @@ export default {
     .profile-container {
       position: relative;
       display: inline-block;
-      .avatar-img {
-        position: absolute;
-        top: -25px;
-        right: 0px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%; /* 圆形头像 */
-        border: 2px solid #fff; /* 白色边框 */
-        transition: transform 0.3s ease;
+      cursor: pointer; /* 添加鼠标指针 */
+
+      .profile-avatar {
+        position: relative;
+
+        .avatar-img {
+          position: absolute;
+          top: -25px;
+          right: 0px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%; /* 圆形头像 */
+          border: 2px solid #fff; /* 白色边框 */
+          transition: transform 0.3s ease;
+        }
+
+        .user-status {
+          position: absolute;
+          top: 20px;
+          right: -20px;
+          font-size: 12px;
+          color: #666;
+          white-space: nowrap;
+          background: rgba(255, 255, 255, 0.9);
+          padding: 2px 6px;
+          border-radius: 4px;
+          transition: opacity 0.3s ease;
+        }
       }
-      .profile-avatar:hover .avatar-img {
-        transform: scale(1.5);
+
+      &:hover .avatar-img {
+        transform: scale(1.1);
         z-index: 1001;
       }
 
@@ -297,7 +413,19 @@ export default {
             border-bottom: 1px solid #f0f0f0;
             padding: 10px;
             text-align: center;
-            transition: background-color 0.2s ease; // 添加过渡效果
+            transition: background-color 0.2s ease;
+
+            &.user-info {
+              background-color: #f8f9fa;
+              border-bottom: 2px solid #e9ecef;
+
+              .username {
+                font-weight: 600;
+                color: #2c3e50;
+                font-size: 14px;
+              }
+            }
+
             a {
               color: #333;
               display: block;
@@ -309,7 +437,7 @@ export default {
             border-bottom: none;
           }
 
-          li:hover {
+          li:not(.user-info):hover {
             background-color: rgba(0, 0, 0, 0.05);
           }
         }

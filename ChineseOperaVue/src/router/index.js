@@ -57,7 +57,12 @@ const constantRoutes = [
     path: '/test',
     name: 'Test',
     component: () => import('@/views/test.vue')
-  }
+  },
+  // {
+  //   path: '/comment-test',
+  //   name: 'CommentTest',
+  //   component: () => import('@/views/CommentTest.vue')
+  // }
 ]
 
 // 动态路由，需要根据权限加载

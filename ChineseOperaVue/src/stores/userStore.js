@@ -54,18 +54,56 @@ export const useUserStore = defineStore('user', {
     },
     logOut() {
       return new Promise((resolve, reject) => {
-        logout(this.token)
-          .then(() => {
-            this.token = ''
-            this.roles = []
-            this.permissions = []
-            removeToken()
+        // 如果没有token，直接清理本地状态
+        if (!this.token) {
+          console.log('没有token，直接清理本地状态')
+          this.clearUserInfo()
+          resolve()
+          return
+        }
+
+        console.log('调用后端退出登录接口')
+        logout() // 注意：不传参数，依赖请求头中的token
+          .then((res) => {
+            console.log('后端退出登录成功:', res)
+            this.clearUserInfo()
             resolve()
           })
           .catch((error) => {
-            reject(error)
+            console.warn('后端退出登录失败，但仍清理本地状态:', error)
+            // 即使后端退出失败，也要清理本地状态
+            this.clearUserInfo()
+            resolve() // 注意这里用resolve而不是reject，确保前端状态被清理
           })
       })
+    },
+    // 清理用户信息和本地存储
+    clearUserInfo() {
+      this.userId = null
+      this.userName = ''
+      this.nickName = ''
+      this.token = ''
+      this.avatar = ''
+      this.roles = ''
+      this.permissions = []
+      removeToken()
+      localStorage.removeItem('user')
+      console.log('用户状态已清理')
+    },
+    // 验证token有效性
+    async validateToken() {
+      if (!this.token) {
+        return false
+      }
+
+      try {
+        await this.getUserInfo()
+        return true
+      } catch (error) {
+        console.warn('Token验证失败，清理用户状态:', error)
+        this.clearUserInfo()
+        return false
+      }
     },
     // 获取用户的详细信息。
     getUserInfo() {
@@ -108,6 +146,15 @@ export const useUserStore = defineStore('user', {
             reject(error)
           })
       })
+    },
+    // 检查用户是否有特定权限
+    hasPermission(permission) {
+      // 超级管理员拥有所有权限
+      if (this.roles === 'super_admin') {
+        return true
+      }
+      // 检查权限数组
+      return this.permissions && this.permissions.includes(permission)
     }
   },
   persist: {

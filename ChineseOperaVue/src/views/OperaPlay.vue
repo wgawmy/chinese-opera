@@ -31,7 +31,7 @@
               <Star/>
             </el-icon> -->
       </div>
-      <Comment v-if="opera" :operaid="this.opera.id"></Comment>
+      <Comment v-if="opera" :operaId="opera.id"></Comment>
     </el-main>
   </div>
 </template>
