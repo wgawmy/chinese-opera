@@ -27,6 +27,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     RedisCache redisCache;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("JwtAuthenticationTokenFilter: " + request.getRequestURI());
         String token = request.getHeader("authorization");
         //此处判断token是否为空
 

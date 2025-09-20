@@ -3,6 +3,7 @@ package com.example.springboot.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.springboot.domain.LoginUser;
+import com.example.springboot.domain.Role;
 import com.example.springboot.domain.User;
 import com.example.springboot.mapper.MenuMapper;
 import com.example.springboot.mapper.UserMapper;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -41,7 +43,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         List<String> permissions = menuMapper.selectPermsByUserId(user.getId());
 
-
+        List<Role> roles = userMapper.selectRolesByUserId(user.getId());
+        List<String> rolePerms = new ArrayList<>();
+        if (roles != null && !roles.isEmpty()) {
+            rolePerms = roles.stream()
+                    .map(role -> "ROLE_" + role.getRoleName()) // 关键：添加 ROLE_ 前缀
+                    .collect(Collectors.toList());
+        }
+        permissions.addAll(rolePerms);
         // 将用户信息封装到UserDetails实现类中
         return new LoginUser(user,permissions);
     }

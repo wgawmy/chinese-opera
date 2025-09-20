@@ -113,6 +113,11 @@ const dynamicRoutes = [
         name: 'ManageMenu',
         component: () => import('@/components/ManageData/ManagePermission/ManageMenu.vue'),
         meta: { title: '权限管理', permissions: ['manage:managemenu'] }
+      },{
+        path: '/managevoucher',
+        name: 'ManageVoucher',
+        component: () => import('@/components/ManageData/ManageVoucher/ManageVoucher.vue'),
+        meta: { title: '优惠卷管理', permissions: ['manage:managevoucher'] }
       }
     ]
   }

@@ -111,12 +111,6 @@ export const useUserStore = defineStore('user', {
         getInfo()
           .then((res) => {
             console.log('获取用户信息接口返回数据结构:', res)
-
-            // 基于响应拦截器返回 response.data，所以这里的 res 就是原始的 response.data
-            // 正确的访问路径应该是：
-            // - res.data.user (如果后端返回结构是 { data: { user: {...}, userPermissions: [...] } })
-            // - 或者 res.user (如果后端直接返回 { user: {...}, userPermissions: [...] })
-
             let userData, permissions
 
             if (res.data?.user) {
@@ -137,7 +131,7 @@ export const useUserStore = defineStore('user', {
             this.userName = userData.userName
             this.nickName = userData.nickName
             this.avatar = userData.avatar
-            this.roles = userData.type === 0 ? 'super_admin' : 'admin'
+            this.roles = userData.type
             this.permissions = permissions || []
 
             resolve(res)

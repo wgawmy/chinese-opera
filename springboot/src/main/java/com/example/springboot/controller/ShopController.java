@@ -10,11 +10,24 @@ import com.example.springboot.utils.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/shop")
 public class ShopController {
     @Autowired
     private IShopService shopService;
+
+    /**
+     * 查询所有商铺信息
+     * @return 商铺列表
+     */
+    @GetMapping("/all")
+    public ResponseResult getAllShop() {
+        List<Shop> shops = shopService.list();
+        return new ResponseResult(HttpStatus.SUCCESS, shops);
+    }
+
     /**
      * 根据id查询商铺信息
      * @param id 商铺id

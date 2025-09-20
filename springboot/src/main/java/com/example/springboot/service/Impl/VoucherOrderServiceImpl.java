@@ -24,8 +24,8 @@ import java.util.Collections;
 @Service
 public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, VoucherOrder>
         implements IVoucherOrderService {
-    @Resource
-    private ISeckillVoucherService seckillVoucherService;
+//    @Resource
+//    private ISeckillVoucherService seckillVoucherService;
     @Resource
     private RedisIdWorker redisIdWorker;
     @Autowired
@@ -58,7 +58,10 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         //2.判断结果是否为0
         if (r != 0) {
             // 2.1.不为0 ，代表没有购买资格
-            return new ResponseResult(HttpStatus.ERROR,r == 1 ? "库存不足" : "不能重复下单");
+            if(r==2){
+                return new ResponseResult(HttpStatus.ERROR,"不能重复下单");
+            }
+            return new ResponseResult(HttpStatus.ERROR,"库存不足");
         }
         VoucherOrder voucherOrder = new VoucherOrder();
         voucherOrder.setId(orderId);

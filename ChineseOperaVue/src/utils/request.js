@@ -7,7 +7,7 @@ axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8081',
-  timeout: 10000 // 添加请求超时
+  // timeout: 10000 // 添加请求超时
 })
 
 // 1.请求拦截器
@@ -41,9 +41,6 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    // 对响应错误做处理
-    console.error('请求错误:', error)
-
     // 根据不同的错误状态码进行不同的处理
     if (error.response) {
       switch (error.response.status) {

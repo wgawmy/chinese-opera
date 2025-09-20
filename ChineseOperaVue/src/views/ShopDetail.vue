@@ -118,6 +118,10 @@ export default {
     },
     buyCoupon(coupon) {
       seckillVoucher(coupon.id).then(res=>{
+        if(res.code!==200){
+          this.$message.error(res.msg);
+          return;
+        }
         this.$message.success(`已抢购：${coupon.title}`);
       })
     },

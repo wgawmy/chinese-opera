@@ -5,6 +5,12 @@ import request from '@/utils/request.js'
 //         method:'get',
 //     })
 // }
+export function getAllShops() {
+  return request({
+    url: '/shop/all',
+    method: 'get'
+  })
+}
 
 export function getShopListByName(current){
     return request({

@@ -42,3 +42,6 @@ export const PAGINATION = {
   DEFAULT_PAGE_SIZE: 10,
   PAGE_SIZES: [10, 20, 50, 100]
 }
+
+export const ADMIN_ROLE = 1
+export const USER_ROLE = 0

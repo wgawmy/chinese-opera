@@ -1,6 +1,7 @@
 package com.example.springboot.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.springboot.domain.Role;
 import com.example.springboot.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -14,4 +15,6 @@ public interface UserMapper extends BaseMapper<User> {
     User selectById(Long userId);
 
     List<User> getAllUsersWithRoles();
+
+    List<Role> selectRolesByUserId(Long userId);
 }

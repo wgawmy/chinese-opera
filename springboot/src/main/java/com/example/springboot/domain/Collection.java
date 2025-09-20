@@ -14,7 +14,7 @@ import java.util.Date;
 @TableName("opera_collections")
 public class Collection {
     @TableId(type = IdType.AUTO)
-    private int collectionId;
+    private Integer collectionId;
     private String title;
     private String description;
     private LocalDateTime createdAt;

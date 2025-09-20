@@ -122,7 +122,7 @@ import { getCodeImg, register } from '@/api/login'
 import Cookies from 'js-cookie'
 import { EncryptedPassword, DecryptPassword } from '@/utils/jsencrypt.js'
 import useUserStore from '@/stores/userStore'
-
+import { ADMIN_ROLE } from '@/constants'
 export default {
   name: 'Login',
   setup() {
@@ -191,10 +191,14 @@ export default {
         await userStore.getUserInfo()
 
         ElMessage.success('登录成功')
-
-        // 跳转
-        const redirect = route.query.redirect || '/'
-        router.push(redirect)
+        const userRole = userStore.roles
+        console.log('用户角色:', userRole)
+        if (userRole == ADMIN_ROLE) {
+          router.push({ name: 'ManageData' }) // 跳转到管理后台
+        } else {
+          const redirect = route.query.redirect || '/'
+          router.push(redirect)
+        }
       } catch (error) {
         console.error('登录失败:', error)
         ElMessage.error(error.message || '登录失败，请重试')

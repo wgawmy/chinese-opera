@@ -2,7 +2,7 @@
     <!-- <el-header style="padding:0;height: auto;">
         <HomeHeader></HomeHeader>
     </el-header> -->
-    <Header :showBackground="false" :showLogo="false"></Header>
+    <!-- <Header :showBackground="false" :showLogo="false"></Header> -->
     <el-container class="container">
         <!-- 侧边栏 -->
         <el-aside style="width:200px">

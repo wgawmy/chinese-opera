@@ -78,7 +78,8 @@ public class SecurityConfig {
                                 "/shop/**",              // 商店相关接口
 
                                 // 静态资源
-                                "/upload/**"             // 上传文件访问
+                                "/upload/**",            // 上传文件访问
+                                "/voucher/list/{shopId}"
                         )
                         .permitAll()  // 改为 permitAll() 允许所有人访问（包括已登录和未登录用户）
                         // 需要登录的接口
@@ -100,7 +101,8 @@ public class SecurityConfig {
 
                                 // 收藏等个人功能
                                 "/collection/**",        // 收藏相关
-                                "/favorites/**"          // 收藏夹相关
+                                "/favorites/**",         // 收藏夹相关
+                                "/voucher-order/seckill/"
                         )
                         .authenticated()
                         // 管理员接口（需要特定权限）
@@ -109,9 +111,10 @@ public class SecurityConfig {
                                 "/audio/addaudiobatch",  // 批量添加音频
                                 "/user/list",            // 用户列表管理
                                 "/menu/**",              // 菜单权限管理
-                                "/role/**"               // 角色管理
+                                "/role/**",            // 角色管理
+                                "/voucher/**"           // 修正为带斜杠，正确匹配所有voucher相关接口
                         )
-                        .hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .hasAnyRole("ADMIN")
                         .anyRequest().authenticated())
                 //开启跨域访问
                 .cors(withDefaults())

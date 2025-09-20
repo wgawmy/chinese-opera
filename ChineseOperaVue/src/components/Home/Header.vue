@@ -13,7 +13,7 @@
           </a>
         </li>
         <li class="left-item">
-          <a href="#">
+          <a href="#" @click="goToDO">
             <span>戏小圈</span>
           </a>
         </li>
@@ -89,7 +89,7 @@
         </li>
         <!-- 收藏 -->
         <li class="right-item">
-          <a>
+          <a @click="goToDO">
             <span>收藏</span>
           </a>
         </li>
@@ -105,13 +105,13 @@
           </a>
         </li>
         <li class="right-item">
-          <a>
+          <a @click="goToDO">
             <span>动态</span>
           </a>
         </li>
-        <li class="right-item" @click="navigateToManage">
+        <!-- <li class="right-item" @click="navigateToManage">
           <el-button type="danger" v-hasPermi="['manage:edit']">管理</el-button>
-        </li>
+        </li> -->
       </ul>
     </div>
     <!-- 存放梨园撷英标志的地方 -->
@@ -180,6 +180,10 @@ export default {
         this.goToLogin()
       }
       // 如果已登录，保持下拉菜单行为
+    },
+    goToDO() {
+      //弹出对话框，显示功能待完善
+      this.$message.info('功能待完善')
     },
     goToLogin() {
       this.$router.push({
@@ -260,11 +264,6 @@ export default {
       }
 
       console.log('=== 退出登录流程结束 ===')
-    },
-    navigateToManage() {
-      this.$router.push({
-        name: 'ManageData'
-      })
     },
     navigateToHome() {
       this.$router.push({

@@ -10,9 +10,10 @@ import 'element-plus/dist/index.css'
 import * as ElIconModules from '@element-plus/icons-vue'
 import { initializeUserState } from '@/utils/authSync'
 
+
 // 在开发环境显示环境信息
 if (import.meta.env.DEV) {
-  console.log('🚀 当前环境信息:')
+  console.log('当前环境信息:')
   console.log('Mode:', import.meta.env.MODE)
   console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL)
   console.log('App Title:', import.meta.env.VITE_APP_TITLE)
