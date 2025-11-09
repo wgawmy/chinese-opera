@@ -18,8 +18,6 @@
 
 <img width="2146" height="1157" alt="image" src="https://github.com/user-attachments/assets/6c34f2ac-871e-42bc-80e3-c82879c39907" />
 
-<img width="2168" height="1160" alt="image" src="https://github.com/user-attachments/assets/8314f977-174c-4463-937d-73e2dd07d129" />
-
 <img width="2151" height="762" alt="image" src="https://github.com/user-attachments/assets/369f62bc-e646-4a7a-a637-edd08a99482d" />
 
 
