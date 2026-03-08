@@ -24,12 +24,17 @@
       </div>
 
       <div class="user-operate">
-        <!-- 点赞 -->
-
-        <!-- 收藏 -->
-        <!-- <el-icon :size="20" class="star">
-              <Star/>
-            </el-icon> -->
+        <!-- 收藏和评分 -->
+        <el-icon :size="20" class="star" @click="toggleCollect">
+          <Star :style="{ color: isCollected ? 'yellow' : '' }" />
+        </el-icon>
+        <el-rate
+          v-model="userScore"
+          :max="5"
+          @change="rateOpera"
+          allow-half
+          style="margin-left: 10px"
+        ></el-rate>
       </div>
       <Comment v-if="opera" :operaId="opera.id"></Comment>
     </el-main>
@@ -55,7 +60,9 @@ export default {
       opera: null,
       operaList: [],
       collection: '',
-      nameShow: ''
+      nameShow: '',
+      isCollected: false,
+      userScore: 0
     }
   },
   created() {
@@ -69,10 +76,38 @@ export default {
     } else {
       this.getOperasByTag(this.opera.tag)
     }
+    // 初始化收藏和评分状态（假设有API，实际需替换为真实接口）
+    this.initCollectAndScore()
   },
   methods: {
-    collectOpera() {
-      // 收藏逻辑
+    // 初始化收藏和评分状态（需替换为真实API）
+    initCollectAndScore() {
+      // 示例：假设有API getOperaUserStatus(operaId)
+      // getOperaUserStatus(this.opera.id).then(res => {
+      //   this.isCollected = res.collected
+      //   this.userScore = res.score
+      // })
+      // 这里用默认值演示
+      this.isCollected = false
+      this.userScore = 0
+    },
+    toggleCollect() {
+      // 收藏/取消收藏逻辑，需替换为真实API
+      // collectOperaApi(this.opera.id, !this.isCollected).then(() => {
+      //   this.isCollected = !this.isCollected
+      //   this.$message.success(this.isCollected ? '已收藏' : '已取消收藏')
+      // })
+      this.isCollected = !this.isCollected
+      this.$message.success(this.isCollected ? '已收藏' : '已取消收藏')
+    },
+    rateOpera(score) {
+      // 评分逻辑，需替换为真实API
+      // rateOperaApi(this.opera.id, score).then(() => {
+      //   this.userScore = score
+      //   this.$message.success(`评分成功：${score}分`)
+      // })
+      this.userScore = score
+      this.$message.success(`评分成功：${score}分`)
     },
     // 根据collectid 获得属于相同组的戏曲
     getOperaListByConditionId(collectionId) {

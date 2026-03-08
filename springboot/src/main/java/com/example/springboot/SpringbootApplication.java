@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableRabbit
 @MapperScan("com.example.springboot.mapper")
+// 后端主服务入口：启动戏曲平台业务 API、定时任务与消息队列消费
 public class SpringbootApplication {
 
     public static void main(String[] args) {

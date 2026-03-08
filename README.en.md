@@ -1,10 +1,12 @@
 # ChineseOpera
 
 #### Description
-这是一个戏曲推荐平台，为了服务对于戏曲感兴趣的朋友们。
+ChineseOpera is an opera recommendation platform designed for users who love traditional operas.
 
 #### Software Architecture
-Software architecture description
+- Frontend: `ChineseOperaVue` built with Vue 3 + Vite for UI and interaction;
+- Backend: `springboot` exposes core business APIs (user, opera, order, etc.);
+- Recommendation: `recommend` and `Python` modules provide offline training and recommendation services.
 
 #### Installation
 

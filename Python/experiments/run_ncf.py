@@ -1,3 +1,5 @@
+"""离线训练与评估 NCF 模型的脚本，用于生成推荐结果和中间产物。"""
+
 import os
 import sys
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

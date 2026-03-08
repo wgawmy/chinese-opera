@@ -1,3 +1,5 @@
+"""基于向量检索的实时推荐服务，提供 HTTP 接口返回相似戏曲条目。"""
+
 import torch
 import numpy as np
 import faiss

@@ -1,3 +1,4 @@
+// 应用入口：创建 Vue 应用并挂载全局插件、路由和状态管理
 import './assets/styles/index.scss'
 import directive from './diretive'
 import { createApp } from 'vue'

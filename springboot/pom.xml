@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<kaptcha.version>2.3.3</kaptcha.version>
+		<scala.version>2.13.12</scala.version>
 	</properties>
 	<dependencies>
 
@@ -155,6 +156,36 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.spark</groupId>-->
+<!--			<artifactId>spark-core_2.13</artifactId>-->
+<!--			<version>3.5.0</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.spark</groupId>-->
+<!--			<artifactId>spark-sql_2.13</artifactId>-->
+<!--			<version>3.5.0</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.apache.spark</groupId>-->
+<!--			<artifactId>spark-mllib_2.13</artifactId>-->
+<!--			<version>3.5.0</version> &lt;!&ndash; 根据你安装的 Spark 版本修改 &ndash;&gt;-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>javax.servlet</groupId>-->
+<!--			<artifactId>javax.servlet-api</artifactId>-->
+<!--			<version>4.0.1</version>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+
+
 	</dependencies>
 
 	<build>
@@ -179,6 +210,21 @@
 				<configuration>
 					<mainClass>com.example.springboot.SpringbootApplication</mainClass> <!-- 这里是你的主类 -->
 				</configuration>
+			</plugin>
+
+			<!-- Scala Maven Plugin -->
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>4.8.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
